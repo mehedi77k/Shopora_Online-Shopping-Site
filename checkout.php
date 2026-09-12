@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address = trim($_POST['shipping_address'] ?? '');
     $paymentMethod = $_POST['payment_method'] ?? 'Cash on Delivery';
     $allowed = ['Cash on Delivery','Card','Mobile Banking'];
-    if (mb_strlen($address) < 10) $errors[] = 'Please enter a complete shipping address.';
+    if (text_length($address) < 10) $errors[] = 'Please enter a complete shipping address.';
     if (!in_array($paymentMethod, $allowed, true)) $errors[] = 'Choose a valid payment method.';
     $currentRate = current_usd_rate($pdo);
     if (!$currentRate) $errors[] = 'USD reference rate is not configured yet.';

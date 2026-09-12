@@ -11,7 +11,7 @@ require __DIR__ . '/includes/header.php';
 </section>
 
 <section class="section-sm">
-    <div class="container info-grid">
+    <div class="container info-grid about-info-grid">
         <div class="info-card">
             <h3>Customer experience</h3>
             <p class="muted">Product browsing, search, cart, checkout, order history and reviews.</p>

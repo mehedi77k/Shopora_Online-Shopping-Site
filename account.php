@@ -37,10 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     $gender = trim($_POST['gender'] ?? '');
     $removeImage = !empty($_POST['remove_profile_image']);
 
-    if (mb_strlen($name) < 2 || mb_strlen($name) > 100) $errors[] = 'Full name must be between 2 and 100 characters.';
-    if (mb_strlen($profileNumber) > 50) $errors[] = 'Profile / ID number is too long.';
-    if (mb_strlen($phone) > 30) $errors[] = 'Primary phone number is too long.';
-    if (mb_strlen($address) > 1000) $errors[] = 'Address is too long.';
+    if (text_length($name) < 2 || text_length($name) > 100) $errors[] = 'Full name must be between 2 and 100 characters.';
+    if (text_length($profileNumber) > 50) $errors[] = 'Profile / ID number is too long.';
+    if (text_length($phone) > 30) $errors[] = 'Primary phone number is too long.';
+    if (text_length($address) > 1000) $errors[] = 'Address is too long.';
     if (!in_array($bloodGroup, $bloodGroups, true)) $errors[] = 'Choose a valid blood group.';
     if (!in_array($gender, $genderOptions, true)) $errors[] = 'Choose a valid gender option.';
 
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             $errors[] = 'Every mobile entry needs a mobile number.';
             continue;
         }
-        if (mb_strlen($label) > 40 || mb_strlen($number) > 30) {
+        if (text_length($label) > 40 || text_length($number) > 30) {
             $errors[] = 'A mobile label or number is too long.';
             continue;
         }

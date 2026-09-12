@@ -17,7 +17,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
     if($action==='reply'){
         $message = trim($_POST['message'] ?? '');
-        if(mb_strlen($message)<2 || mb_strlen($message)>5000) $errors[]='Reply must be between 2 and 5000 characters.';
+        if(text_length($message)<2 || text_length($message)>5000) $errors[]='Reply must be between 2 and 5000 characters.';
         if(!$errors){
             $stmt=$pdo->prepare("INSERT INTO contact_messages (conversation_id,sender_user_id,sender_role,message_type,sender_name,sender_email,message_text,seen_by_requester,seen_by_staff) VALUES (?,?,?,'staff',?,?,?,0,1)");
             $stmt->execute([$id,$actorId,current_role(),$_SESSION['user']['full_name'],$_SESSION['user']['email'],$message]);
@@ -61,8 +61,8 @@ require __DIR__ . '/includes/admin_header.php';
         <?php if($conversation['user_id']): ?><a class="btn btn-ghost btn-block" href="<?= url('admin/user_history.php?email='.urlencode($conversation['requester_email'])) ?>">View complete user history</a><?php endif; ?>
         <h3>Send staff reply</h3>
         <?php if($errors): ?><div class="flash flash-error"><?= e(implode(' ',$errors)) ?></div><?php endif; ?>
-        <form method="post" data-realtime-form="support-reply"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="reply"><div class="form-group"><label>Reply</label><textarea class="form-control" name="message" maxlength="5000" required></textarea></div><p class="form-inline-error" data-form-error hidden></p><div class="form-actions"><button class="btn btn-primary btn-block">Send reply</button></div></form>
-        <form method="post" style="margin-top:16px" data-realtime-form="support-status"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="status"><div class="form-group"><label>Conversation status</label><select class="form-control" name="status"><?php foreach(['Open','Answered','Closed'] as $s): ?><option value="<?= $s ?>" <?= $conversation['status']===$s?'selected':'' ?>><?= $s ?></option><?php endforeach; ?></select></div><p class="form-inline-error" data-form-error hidden></p><div class="form-actions"><button class="btn btn-ghost btn-block">Update status</button></div></form>
+        <form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="reply"><div class="form-group"><label>Reply</label><textarea class="form-control" name="message" maxlength="5000" required></textarea></div><div class="form-actions"><button class="btn btn-primary btn-block">Send reply</button></div></form>
+        <form method="post" style="margin-top:16px"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="status"><div class="form-group"><label>Conversation status</label><select class="form-control" name="status"><?php foreach(['Open','Answered','Closed'] as $s): ?><option value="<?= $s ?>" <?= $conversation['status']===$s?'selected':'' ?>><?= $s ?></option><?php endforeach; ?></select></div><div class="form-actions"><button class="btn btn-ghost btn-block">Update status</button></div></form>
     </aside>
 </div>
 <?php require __DIR__ . '/includes/admin_footer.php'; ?>

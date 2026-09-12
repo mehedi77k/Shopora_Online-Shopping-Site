@@ -17,7 +17,7 @@ if (!$conversation) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $message = trim($_POST['message'] ?? '');
-    if (mb_strlen($message) < 2 || mb_strlen($message) > 5000) $errors[] = 'Reply must be between 2 and 5000 characters.';
+    if (text_length($message) < 2 || text_length($message) > 5000) $errors[] = 'Reply must be between 2 and 5000 characters.';
     if ($conversation['status'] === 'Closed') $errors[] = 'This conversation is closed. Start a new support message if you still need help.';
 
     if (!$errors) {
@@ -67,7 +67,7 @@ require __DIR__ . '/includes/header.php';
         <h3>Reply</h3>
         <?php if ($errors): ?><div class="flash flash-error"><?= e(implode(' ', $errors)) ?></div><?php endif; ?>
         <div data-support-reply-open <?= $conversation['status'] === 'Closed' ? 'hidden' : '' ?>>
-            <form method="post" data-realtime-form="support-reply"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><div class="form-group"><label>Your message</label><textarea class="form-control" name="message" required maxlength="5000"></textarea></div><p class="form-inline-error" data-form-error hidden></p><div class="form-actions"><button class="btn btn-primary btn-block">Send reply</button></div></form>
+            <form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="reply"><div class="form-group"><label>Your message</label><textarea class="form-control" name="message" required maxlength="5000"></textarea></div><div class="form-actions"><button class="btn btn-primary btn-block">Send reply</button></div></form>
         </div>
         <div data-support-reply-closed <?= $conversation['status'] !== 'Closed' ? 'hidden' : '' ?>>
             <p class="form-note form-note-block">This conversation is closed.</p><a class="btn btn-primary btn-block" href="<?= url('contact.php') ?>">Start new conversation</a>

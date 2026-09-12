@@ -131,12 +131,24 @@
             cache: 'no-store',
             ...options,
         });
+
+        const raw = await response.text();
         let data = null;
         try {
-            data = await response.json();
+            data = raw ? JSON.parse(raw) : null;
         } catch (_) {
-            throw new Error('The server returned an unexpected response.');
+            if (response.redirected || response.status === 401) {
+                throw new Error('Your session has expired. Refresh the page and sign in again.');
+            }
+            if (response.status === 419) {
+                throw new Error('Your form session has expired. Refresh the page and try again.');
+            }
+            if (response.status >= 500) {
+                throw new Error('The server could not process the request. Please refresh the page and try again.');
+            }
+            throw new Error(`The request returned invalid data (HTTP ${response.status || 0}).`);
         }
+
         if (!response.ok || !data?.ok) {
             throw new Error(data?.error || 'The request could not be completed.');
         }
@@ -304,7 +316,7 @@
             const eventConversation = Number(data.conversation_id || 0);
             if (thread) {
                 const currentConversation = Number(thread.dataset.conversationId || 0);
-                if (!eventConversation || eventConversation === currentConversation) refreshSupportThread();
+                if (!eventConversation || eventConversation === currentConversation) schedulePageReload();
                 return;
             }
             if (qs('[data-support-list-page]') && (isStaff() || eventBelongsToCurrentUser(data))) {
@@ -368,7 +380,6 @@
             socket.addEventListener('open', () => {
                 retry = 0;
                 refreshRealtimeState();
-                refreshSupportThread();
             });
 
             socket.addEventListener('message', (event) => {

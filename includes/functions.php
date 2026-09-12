@@ -6,6 +6,23 @@ function e(?string $value): string
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function text_length(?string $value): int
+{
+    $value = (string)$value;
+    return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+}
+
+function text_substr(?string $value, int $start, ?int $length = null): string
+{
+    $value = (string)$value;
+    if (function_exists('mb_substr')) {
+        return $length === null
+            ? mb_substr($value, $start, null, 'UTF-8')
+            : mb_substr($value, $start, $length, 'UTF-8');
+    }
+    return $length === null ? substr($value, $start) : substr($value, $start, $length);
+}
+
 function session_context(): string
 {
     return defined('SESSION_CONTEXT') ? SESSION_CONTEXT : SESSION_CONTEXT_DEFAULT;
@@ -208,18 +225,18 @@ function realtime_notify(string $event, array $data = []): void
         return;
     }
 
-    $event = mb_substr(preg_replace('/[^a-zA-Z0-9._-]/', '', $event), 0, 80);
+    $event = text_substr(preg_replace('/[^a-zA-Z0-9._-]/', '', $event), 0, 80);
     if ($event === '') return;
 
     // Only allow small scalar/identifier payloads. Never broadcast message
     // bodies, passwords, addresses or other private application content.
     $safe = [];
     foreach ($data as $key => $value) {
-        $key = mb_substr((string)$key, 0, 60);
+        $key = text_substr((string)$key, 0, 60);
         if (is_bool($value) || is_int($value) || is_float($value) || $value === null) {
             $safe[$key] = $value;
         } elseif (is_string($value)) {
-            $safe[$key] = mb_substr($value, 0, 120);
+            $safe[$key] = text_substr($value, 0, 120);
         }
     }
 
@@ -751,8 +768,8 @@ function log_user_activity(PDO $pdo, ?int $userId, string $activityType, string 
         return;
     }
 
-    $activityType = mb_substr(trim($activityType), 0, 64);
-    $description = mb_substr(trim($description), 0, 255);
+    $activityType = text_substr(trim($activityType), 0, 64);
+    $description = text_substr(trim($description), 0, 255);
     $metadataJson = $metadata ? json_encode($metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
 
     try {

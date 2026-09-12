@@ -29,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = trim($_POST['subject'] ?? '');
     $message = trim($_POST['message'] ?? '');
 
-    if (mb_strlen($name) < 2 || mb_strlen($name) > 100) $errors[] = 'Enter a valid name.';
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 150) $errors[] = 'Enter a valid email address.';
-    if (mb_strlen($subject) < 3 || mb_strlen($subject) > 180) $errors[] = 'Subject must be between 3 and 180 characters.';
-    if (mb_strlen($message) < 5 || mb_strlen($message) > 5000) $errors[] = 'Message must be between 5 and 5000 characters.';
+    if (text_length($name) < 2 || text_length($name) > 100) $errors[] = 'Enter a valid name.';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || text_length($email) > 150) $errors[] = 'Enter a valid email address.';
+    if (text_length($subject) < 3 || text_length($subject) > 180) $errors[] = 'Subject must be between 3 and 180 characters.';
+    if (text_length($message) < 5 || text_length($message) > 5000) $errors[] = 'Message must be between 5 and 5000 characters.';
 
     if (!$errors) {
         try {

@@ -31,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
-    if (mb_strlen($name) < 2) $errors[] = 'Enter the administrator full name.';
+    if (text_length($name) < 2) $errors[] = 'Enter the administrator full name.';
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Enter a valid administrator email address.';
-    if ($phone !== '' && mb_strlen($phone) > 30) $errors[] = 'Phone number is too long.';
+    if ($phone !== '' && text_length($phone) > 30) $errors[] = 'Phone number is too long.';
     if (strlen($password) < 8) $errors[] = 'Temporary Admin password must contain at least 8 characters.';
     if ($password !== $confirm) $errors[] = 'Passwords do not match.';
 

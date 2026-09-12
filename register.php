@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestedRole = $_POST['account_type'] ?? 'customer';
     $selectedRole = ($firstAdminAvailable && $requestedRole === 'admin') ? 'admin' : 'customer';
 
-    if (mb_strlen($name) < 2) $errors[] = 'Enter your full name.';
+    if (text_length($name) < 2) $errors[] = 'Enter your full name.';
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Enter a valid email address.';
-    if ($phone !== '' && mb_strlen($phone) > 20) $errors[] = 'Phone number is too long.';
+    if ($phone !== '' && text_length($phone) > 20) $errors[] = 'Phone number is too long.';
 
     $minimumPasswordLength = $selectedRole === 'admin' ? 8 : 6;
     if (strlen($password) < $minimumPasswordLength) {
