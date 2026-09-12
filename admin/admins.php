@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // cannot accidentally deactivate or demote their own account.
             $stmt = $pdo->prepare("UPDATE users SET status = ? WHERE user_id = ? AND role = 'admin'");
             $stmt->execute([$status, $id]);
+            if ($stmt->rowCount()) { log_user_activity($pdo, $id, 'account_status_changed', 'Administrator account status changed to ' . $status . '.', ['status'=>$status], (int)$_SESSION['user']['user_id']); }
             flash('success', 'Administrator status updated.');
         }
         redirect('admin/admins.php');
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mb_strlen($name) < 2) $errors[] = 'Enter the administrator full name.';
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Enter a valid administrator email address.';
-    if ($phone !== '' && mb_strlen($phone) > 20) $errors[] = 'Phone number is too long.';
+    if ($phone !== '' && mb_strlen($phone) > 30) $errors[] = 'Phone number is too long.';
     if (strlen($password) < 8) $errors[] = 'Temporary Admin password must contain at least 8 characters.';
     if ($password !== $confirm) $errors[] = 'Passwords do not match.';
 
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'An account already exists with this email address.';
         } else {
             $stmt = $pdo->prepare(
-                "INSERT INTO users (full_name, email, phone, password, role, status) VALUES (?, ?, ?, ?, 'admin', 'active')"
+                "INSERT INTO users (full_name, email, phone, joining_date, password, role, status) VALUES (?, ?, ?, CURDATE(), ?, 'admin', 'active')"
             );
             $stmt->execute([
                 $name,
@@ -51,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $phone !== '' ? $phone : null,
                 password_hash($password, PASSWORD_DEFAULT),
             ]);
+            $newAdminId=(int)$pdo->lastInsertId();
+            log_user_activity($pdo,$newAdminId,'account_created','Admin account created by Super Admin.',['role'=>'admin'],(int)$_SESSION['user']['user_id']);
 
             flash('success', 'New Admin created. They can sign in and change their own password.');
             redirect('admin/admins.php');
@@ -59,12 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $superAdminStmt = $pdo->query(
-    "SELECT user_id, full_name, email, phone, status, created_at FROM users WHERE role = 'super_admin' ORDER BY user_id ASC LIMIT 1"
+    "SELECT user_id, full_name, email, phone, profile_image, status, created_at FROM users WHERE role = 'super_admin' ORDER BY user_id ASC LIMIT 1"
 );
 $superAdmin = $superAdminStmt->fetch();
 
 $admins = $pdo->query(
-    "SELECT user_id, full_name, email, phone, status, created_at
+    "SELECT user_id, full_name, email, phone, profile_image, status, created_at
      FROM users
      WHERE role = 'admin'
      ORDER BY user_id DESC"
@@ -120,7 +123,7 @@ require __DIR__ . '/includes/admin_header.php';
         <h2 style="margin-top:0">Super Admin</h2>
         <?php if ($superAdmin): ?>
             <div class="admin-list-item">
-                <div class="avatar"><?= e(strtoupper(substr($superAdmin['full_name'], 0, 1))) ?></div>
+                <div class="avatar"><?php if(!empty($superAdmin['profile_image'])): ?><img src="<?= e(profile_image($superAdmin['profile_image'])) ?>" alt=""><?php else: ?><?= e(strtoupper(substr($superAdmin['full_name'], 0, 1))) ?><?php endif; ?></div>
                 <div>
                     <strong><?= e($superAdmin['full_name']) ?> (You)</strong>
                     <div class="muted"><?= e($superAdmin['email']) ?></div>
@@ -133,7 +136,7 @@ require __DIR__ . '/includes/admin_header.php';
         <div class="admin-list">
             <?php foreach ($admins as $admin): ?>
                 <div class="admin-list-item" style="align-items:center">
-                    <div class="avatar"><?= e(strtoupper(substr($admin['full_name'], 0, 1))) ?></div>
+                    <div class="avatar"><?php if(!empty($admin['profile_image'])): ?><img src="<?= e(profile_image($admin['profile_image'])) ?>" alt=""><?php else: ?><?= e(strtoupper(substr($admin['full_name'], 0, 1))) ?><?php endif; ?></div>
                     <div style="flex:1">
                         <strong><?= e($admin['full_name']) ?></strong>
                         <div class="muted"><?= e($admin['email']) ?></div>

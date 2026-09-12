@@ -6,9 +6,53 @@ function e(?string $value): string
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function session_context(): string
+{
+    return defined('SESSION_CONTEXT') ? SESSION_CONTEXT : SESSION_CONTEXT_DEFAULT;
+}
+
+function session_context_field(): string
+{
+    if (session_context() === SESSION_CONTEXT_DEFAULT) {
+        return '';
+    }
+
+    return '<input type="hidden" name="' . e(SESSION_CONTEXT_PARAM) . '" value="' . e(session_context()) . '">';
+}
+
+function append_session_context(string $target, ?string $context = null): string
+{
+    $context ??= session_context();
+    if ($context === SESSION_CONTEXT_DEFAULT || $context === '') {
+        return $target;
+    }
+
+    $fragment = '';
+    $hashPos = strpos($target, '#');
+    if ($hashPos !== false) {
+        $fragment = substr($target, $hashPos);
+        $target = substr($target, 0, $hashPos);
+    }
+
+    // Avoid adding the same workspace selector twice.
+    if (!preg_match('/(?:[?&])' . preg_quote(SESSION_CONTEXT_PARAM, '/') . '=/', $target)) {
+        $target .= (str_contains($target, '?') ? '&' : '?')
+            . rawurlencode(SESSION_CONTEXT_PARAM) . '=' . rawurlencode($context);
+    }
+
+    return $target . $fragment;
+}
+
 function url(string $path = ''): string
 {
-    return rtrim(BASE_URL, '/') . '/' . ltrim($path, '/');
+    $target = rtrim(BASE_URL, '/') . '/' . ltrim($path, '/');
+    return append_session_context($target);
+}
+
+function new_account_login_url(): string
+{
+    $context = bin2hex(random_bytes(8));
+    return append_session_context(rtrim(BASE_URL, '/') . '/login.php', $context);
 }
 
 function redirect(string $path): never
@@ -53,7 +97,7 @@ function refresh_authenticated_user(PDO $pdo): bool
         return false;
     }
 
-    $stmt = $pdo->prepare('SELECT user_id, full_name, email, role, status FROM users WHERE user_id = ? LIMIT 1');
+    $stmt = $pdo->prepare('SELECT user_id, full_name, email, role, status, profile_image FROM users WHERE user_id = ? LIMIT 1');
     $stmt->execute([(int)$_SESSION['user']['user_id']]);
     $user = $stmt->fetch();
 
@@ -67,6 +111,7 @@ function refresh_authenticated_user(PDO $pdo): bool
         'full_name' => $user['full_name'],
         'email' => $user['email'],
         'role' => $user['role'],
+        'profile_image' => $user['profile_image'] ?? null,
     ];
 
     return true;
@@ -118,7 +163,7 @@ function csrf_token(): string
 
 function csrf_field(): string
 {
-    return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';
+    return session_context_field() . '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';
 }
 
 function verify_csrf(): void
@@ -132,6 +177,11 @@ function verify_csrf(): void
 
 function flash(string $type, string $message): void
 {
+    // Success/info banner boxes were removed from the interface. Keep only
+    // actionable error flashes for redirects that need user attention.
+    if (in_array($type, ['success', 'info'], true)) {
+        return;
+    }
     $_SESSION['flash_' . $type] = $message;
 }
 
@@ -146,79 +196,279 @@ function get_flash(string $type): ?string
     return $value;
 }
 
+
+/**
+ * Publish a non-sensitive real-time event to the local WebSocket broadcaster.
+ * Failure is intentionally non-fatal: the website remains fully usable even
+ * when the separate WebSocket process is not running.
+ */
+function realtime_notify(string $event, array $data = []): void
+{
+    if (!defined('REALTIME_ENABLED') || !REALTIME_ENABLED) {
+        return;
+    }
+
+    $event = mb_substr(preg_replace('/[^a-zA-Z0-9._-]/', '', $event), 0, 80);
+    if ($event === '') return;
+
+    // Only allow small scalar/identifier payloads. Never broadcast message
+    // bodies, passwords, addresses or other private application content.
+    $safe = [];
+    foreach ($data as $key => $value) {
+        $key = mb_substr((string)$key, 0, 60);
+        if (is_bool($value) || is_int($value) || is_float($value) || $value === null) {
+            $safe[$key] = $value;
+        } elseif (is_string($value)) {
+            $safe[$key] = mb_substr($value, 0, 120);
+        }
+    }
+
+    $packet = json_encode([
+        'event' => $event,
+        'data' => $safe,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($packet === false) return;
+
+    $errno = 0;
+    $errstr = '';
+    $socket = @stream_socket_client(
+        'udp://' . REALTIME_NOTIFY_HOST . ':' . REALTIME_NOTIFY_PORT,
+        $errno,
+        $errstr,
+        0.05,
+        STREAM_CLIENT_CONNECT
+    );
+    if (!$socket) return;
+    @fwrite($socket, $packet);
+    @fclose($socket);
+}
+
+function realtime_event_for_activity(string $activityType): string
+{
+    if (str_starts_with($activityType, 'support_')) return 'support.updated';
+    if (str_starts_with($activityType, 'cart_')) return 'cart.updated';
+    if (str_starts_with($activityType, 'order_') || str_starts_with($activityType, 'payment_')) return 'order.updated';
+    if (str_starts_with($activityType, 'product_')) return 'product.updated';
+    if (str_starts_with($activityType, 'category_')) return 'category.updated';
+    if (str_starts_with($activityType, 'currency_')) return 'currency.updated';
+    if (str_starts_with($activityType, 'review_')) return 'review.updated';
+    if (str_starts_with($activityType, 'account_') || in_array($activityType, ['login','logout','password_changed'], true)) return 'account.updated';
+    return 'activity.updated';
+}
+
 function money(float|int|string $amount): string
 {
     return CURRENCY . number_format((float)$amount, 2);
 }
 
-function eur_money(float|int|string $amount): string
+function usd_money(float|int|string $amount): string
 {
-    return '€' . number_format((float)$amount, 2);
+    return '$' . number_format((float)$amount, 2);
 }
 
-function current_eur_rate(PDO $pdo): ?float
+function usd_rate(float|int|string $rate): string
 {
-    static $cached = null;
-    static $loaded = false;
+    return '$' . number_format((float)$rate, 4);
+}
 
-    if ($loaded) {
-        return $cached;
+function fetch_live_eur_usd_rate(): ?array
+{
+    if (!defined('FX_AUTO_UPDATE_ENABLED') || !FX_AUTO_UPDATE_ENABLED) {
+        return null;
     }
-    $loaded = true;
 
-    try {
-        $stmt = $pdo->prepare("SELECT rate_to_bdt FROM currency_rates WHERE currency_code='EUR' AND is_active=1 LIMIT 1");
-        $stmt->execute();
-        $rate = $stmt->fetchColumn();
-        if ($rate !== false && (float)$rate > 0) {
-            $cached = (float)$rate;
+    $url = FX_PROVIDER_URL;
+    $body = false;
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_HTTPHEADER => ['Accept: application/json', 'User-Agent: Shopora/1.0'],
+        ]);
+        $body = curl_exec($ch);
+        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($status < 200 || $status >= 300) {
+            $body = false;
         }
-    } catch (Throwable $e) {
-        $cached = null;
     }
 
-    return $cached;
+    if ($body === false && filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)) {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 5,
+                'header' => "Accept: application/json\r\nUser-Agent: Shopora/1.0\r\n",
+            ],
+        ]);
+        $body = @file_get_contents($url, false, $context);
+    }
+
+    if (!is_string($body) || $body === '') {
+        return null;
+    }
+
+    $data = json_decode($body, true);
+    if (!is_array($data)) {
+        return null;
+    }
+
+    $rate = isset($data['rate']) ? (float)$data['rate'] : 0.0;
+    if ($rate <= 0 || $rate > 10) {
+        return null;
+    }
+
+    $date = isset($data['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$data['date'])
+        ? (string)$data['date']
+        : null;
+
+    return [
+        'rate' => $rate,
+        'date' => $date,
+        'source' => FX_PROVIDER_NAME,
+        'url' => $url,
+    ];
 }
 
-function bdt_to_eur(float|int|string $amount, ?float $rate = null): ?float
+function sync_live_usd_rate(PDO $pdo, bool $force = false): array
+{
+    $row = null;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM currency_rates WHERE currency_code='USD' LIMIT 1");
+        $stmt->execute();
+        $row = $stmt->fetch() ?: null;
+    } catch (Throwable $e) {
+        return ['ok' => false, 'rate' => null, 'live' => false, 'error' => 'Currency table is unavailable.'];
+    }
+
+    $cachedRate = ($row && (float)($row['rate_per_eur'] ?? 0) > 0) ? (float)$row['rate_per_eur'] : null;
+    $lastChecked = $row['last_checked_at'] ?? null;
+    $checkedTs = $lastChecked ? strtotime((string)$lastChecked) : false;
+    $stale = !$checkedTs || (time() - $checkedTs) >= FX_REFRESH_INTERVAL_SECONDS;
+
+    if (!$force && (!$stale || !FX_AUTO_UPDATE_ENABLED)) {
+        return [
+            'ok' => $cachedRate !== null,
+            'rate' => $cachedRate,
+            'live' => false,
+            'source' => $row['source_name'] ?? FX_PROVIDER_NAME,
+            'source_date' => $row['source_date'] ?? null,
+            'last_checked_at' => $lastChecked,
+        ];
+    }
+
+    $live = fetch_live_eur_usd_rate();
+    if ($live) {
+        $oldRate = $cachedRate;
+        try {
+            $stmt = $pdo->prepare(
+                "INSERT INTO currency_rates
+                    (currency_code,currency_name,currency_symbol,rate_per_eur,is_active,updated_by,source_name,source_url,source_date,last_checked_at,auto_update)
+                 VALUES ('USD','US Dollar','$',?,1,NULL,?,?,?,?,1)
+                 ON DUPLICATE KEY UPDATE
+                    rate_per_eur=VALUES(rate_per_eur),
+                    is_active=1,
+                    updated_by=NULL,
+                    source_name=VALUES(source_name),
+                    source_url=VALUES(source_url),
+                    source_date=VALUES(source_date),
+                    last_checked_at=VALUES(last_checked_at),
+                    auto_update=1"
+            );
+            $now = date('Y-m-d H:i:s');
+            $stmt->execute([$live['rate'], $live['source'], $live['url'], $live['date'], $now]);
+            $cachedRate = (float)$live['rate'];
+            $changed = $oldRate === null || abs($oldRate - $cachedRate) >= 0.000001;
+            if ($changed) {
+                realtime_notify('currency.updated', [
+                    'currency' => 'USD',
+                    'rate' => $cachedRate,
+                    'source_date' => $live['date'] ?? '',
+                ]);
+            }
+            return [
+                'ok' => true,
+                'rate' => $cachedRate,
+                'live' => true,
+                'changed' => $changed,
+                'source' => $live['source'],
+                'source_date' => $live['date'],
+                'last_checked_at' => $now,
+            ];
+        } catch (Throwable $e) {
+            // Fall through to the cached value below.
+        }
+    }
+
+    // Back off for one refresh interval after an upstream failure so every page
+    // request does not block waiting for the same unavailable service.
+    if ($row) {
+        try {
+            $pdo->prepare("UPDATE currency_rates SET last_checked_at=CURRENT_TIMESTAMP WHERE currency_code='USD'")->execute();
+        } catch (Throwable $e) {
+        }
+    }
+
+    return [
+        'ok' => $cachedRate !== null,
+        'rate' => $cachedRate,
+        'live' => false,
+        'source' => $row['source_name'] ?? FX_PROVIDER_NAME,
+        'source_date' => $row['source_date'] ?? null,
+        'last_checked_at' => date('Y-m-d H:i:s'),
+        'error' => 'Live rate source is temporarily unavailable; using the last saved rate.',
+    ];
+}
+
+function current_usd_rate(PDO $pdo, bool $forceRefresh = false): ?float
+{
+    $result = sync_live_usd_rate($pdo, $forceRefresh);
+    return isset($result['rate']) && (float)$result['rate'] > 0 ? (float)$result['rate'] : null;
+}
+
+function eur_to_usd(float|int|string $amount, ?float $rate = null): ?float
 {
     global $pdo;
-    $rate ??= current_eur_rate($pdo);
+    $rate ??= current_usd_rate($pdo);
     if (!$rate || $rate <= 0) {
         return null;
     }
-    return round((float)$amount / $rate, 2);
+    return round((float)$amount * $rate, 2);
 }
 
-function dual_money(float|int|string $bdtAmount, ?float $eurAmount = null, ?float $rate = null, bool $approx = true): string
+function dual_money(float|int|string $eurAmount, ?float $usdAmount = null, ?float $rate = null, bool $approx = true): string
 {
-    $bdt = money($bdtAmount);
-    $eurAmount ??= bdt_to_eur($bdtAmount, $rate);
-    $secondary = $eurAmount === null
-        ? '<span class="price-secondary">EUR rate not set</span>'
-        : '<span class="price-secondary">' . ($approx ? '≈ ' : '') . eur_money($eurAmount) . '</span>';
+    $eur = money($eurAmount);
+    $usdAmount ??= eur_to_usd($eurAmount, $rate);
+    $secondary = $usdAmount === null
+        ? '<span class="price-secondary">USD rate not set</span>'
+        : '<span class="price-secondary">' . ($approx ? '≈ ' : '') . usd_money($usdAmount) . '</span>';
 
-    return '<span class="dual-price"><span class="price-primary">' . $bdt . '</span>' . $secondary . '</span>';
+    return '<span class="dual-price"><span class="price-primary">' . $eur . '</span>' . $secondary . '</span>';
 }
 
-function order_eur_amount(array $order): ?float
+function order_usd_amount(array $order): ?float
 {
-    if (isset($order['total_eur']) && $order['total_eur'] !== null && $order['total_eur'] !== '') {
-        return (float)$order['total_eur'];
+    if (isset($order['total_usd']) && $order['total_usd'] !== null && $order['total_usd'] !== '') {
+        return (float)$order['total_usd'];
     }
-    $rate = isset($order['eur_exchange_rate']) && (float)$order['eur_exchange_rate'] > 0
-        ? (float)$order['eur_exchange_rate']
+    $rate = isset($order['usd_exchange_rate']) && (float)$order['usd_exchange_rate'] > 0
+        ? (float)$order['usd_exchange_rate']
         : null;
-    return bdt_to_eur((float)$order['total_amount'], $rate);
+    return eur_to_usd((float)$order['total_amount'], $rate);
 }
 
 function order_rate(array $order): ?float
 {
     global $pdo;
-    if (isset($order['eur_exchange_rate']) && (float)$order['eur_exchange_rate'] > 0) {
-        return (float)$order['eur_exchange_rate'];
+    if (isset($order['usd_exchange_rate']) && (float)$order['usd_exchange_rate'] > 0) {
+        return (float)$order['usd_exchange_rate'];
     }
-    return current_eur_rate($pdo);
+    return current_usd_rate($pdo);
 }
 
 function stored_image_url(?string $path, string $placeholder): string
@@ -252,6 +502,11 @@ function product_image(?string $path): string
 function category_image(?string $path): string
 {
     return stored_image_url($path, 'assets/img/category-placeholder.svg');
+}
+
+function profile_image(?string $path): string
+{
+    return stored_image_url($path, 'assets/img/profile-placeholder.svg');
 }
 
 function fetch_categories(PDO $pdo): array
@@ -413,7 +668,7 @@ function store_uploaded_image(array $file, string $folder): ?string
         throw new RuntimeException(uploaded_image_error_message($error));
     }
 
-    if (!in_array($folder, ['products', 'categories'], true)) {
+    if (!in_array($folder, ['products', 'categories', 'profiles'], true)) {
         throw new RuntimeException('Invalid image destination.');
     }
 
@@ -465,7 +720,7 @@ function store_uploaded_image(array $file, string $folder): ?string
 function delete_uploaded_image(?string $path): void
 {
     $path = ltrim(str_replace('\\', '/', trim((string)$path)), '/');
-    if (!preg_match('~^uploads/(products|categories)/[a-f0-9]{24,64}\.(?:jpg|png|webp)$~i', $path)) {
+    if (!preg_match('~^uploads/(products|categories|profiles)/[a-f0-9]{24,64}\.(?:jpg|png|webp)$~i', $path)) {
         return;
     }
 
@@ -480,4 +735,87 @@ function save_uploaded_image(array $file, ?string $oldPath = null): ?string
 {
     $newPath = store_uploaded_image($file, 'products');
     return $newPath ?? $oldPath;
+}
+
+/**
+ * Record a meaningful account action for the searchable user-history screen.
+ * Logging failures are intentionally non-fatal so normal shopping actions are
+ * not interrupted if the audit table has not been migrated yet.
+ */
+function log_user_activity(PDO $pdo, ?int $userId, string $activityType, string $description, array $metadata = [], ?int $actorUserId = null): void
+{
+    if ($actorUserId === null && is_logged_in()) {
+        $actorUserId = (int)$_SESSION['user']['user_id'];
+    }
+    if ($userId === null && $actorUserId === null) {
+        return;
+    }
+
+    $activityType = mb_substr(trim($activityType), 0, 64);
+    $description = mb_substr(trim($description), 0, 255);
+    $metadataJson = $metadata ? json_encode($metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
+
+    try {
+        $stmt = $pdo->prepare(
+            'INSERT INTO user_activity_logs (user_id, actor_user_id, activity_type, description, metadata_json)
+             VALUES (?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([$userId, $actorUserId, $activityType, $description, $metadataJson]);
+    } catch (Throwable $e) {
+        // Keep the primary application action working even before migration.
+    }
+
+    $eventPayload = [
+        'user_id' => $userId,
+        'actor_user_id' => $actorUserId,
+        'activity_type' => $activityType,
+    ];
+    foreach (['conversation_id','order_id','product_id','category_id','status'] as $key) {
+        if (array_key_exists($key, $metadata)) $eventPayload[$key] = $metadata[$key];
+    }
+    realtime_notify(realtime_event_for_activity($activityType), $eventPayload);
+}
+
+function support_counts_for_user(PDO $pdo, int $userId): array
+{
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(DISTINCT c.conversation_id) AS total,
+                    COUNT(DISTINCT CASE WHEN c.status <> 'Closed' THEN c.conversation_id END) AS active,
+                    COALESCE(SUM(CASE WHEN m.message_type='staff' AND m.seen_by_requester=0 THEN 1 ELSE 0 END),0) AS unread
+             FROM contact_conversations c
+             LEFT JOIN contact_messages m ON m.conversation_id=c.conversation_id
+             WHERE c.user_id=?"
+        );
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch() ?: [];
+        return [
+            'total' => (int)($row['total'] ?? 0),
+            'active' => (int)($row['active'] ?? 0),
+            'unread' => (int)($row['unread'] ?? 0),
+        ];
+    } catch (Throwable $e) {
+        return ['total' => 0, 'active' => 0, 'unread' => 0];
+    }
+}
+
+function support_unread_for_staff(PDO $pdo): int
+{
+    try {
+        return (int)$pdo->query(
+            "SELECT COUNT(*) FROM contact_messages WHERE message_type='requester' AND seen_by_staff=0"
+        )->fetchColumn();
+    } catch (Throwable $e) {
+        return 0;
+    }
+}
+
+function support_role_label(string $role): string
+{
+    return match ($role) {
+        'super_admin' => 'Super Admin',
+        'admin' => 'Admin',
+        'customer' => 'Customer',
+        default => 'Guest',
+    };
 }

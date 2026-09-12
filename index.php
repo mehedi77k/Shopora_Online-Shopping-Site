@@ -39,8 +39,9 @@ require __DIR__ . '/includes/header.php';
             </div>
         </div>
         <div class="hero-card" aria-hidden="true">
-            <div class="hero-orb"></div>
-            <div class="hero-bag"></div>
+            <div class="hero-logo-stage">
+                <img class="hero-shopora-logo" src="<?= url('assets/images/shopora-logo.png') ?>" alt="">
+            </div>
             <div class="floating-card float-one">Fast delivery<small>Across Bangladesh</small></div>
             <div class="floating-card float-two">Fresh arrivals<small>Updated regularly</small></div>
         </div>

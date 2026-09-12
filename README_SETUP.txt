@@ -17,7 +17,7 @@ Import:
     online_shop.sql
 
 This fresh SQL recreates the database, inserts sample categories/products, adds
-the Super Admin authentication structure, and enables BDT + EUR support.
+the Super Admin authentication structure, and enables EUR + USD support.
 No user/admin account is inserted, so first-time registration works correctly.
 
 3. EXISTING DATABASE UPGRADE
@@ -26,11 +26,11 @@ If you already have important data, DO NOT import online_shop.sql.
 
 Run these migrations instead:
     1) database_migration_super_admin.sql   (only if Super Admin migration was not run before)
-    2) database_migration_currency.sql      (adds BDT/EUR support without deleting data)
+    2) database_migration_currency.sql      (adds EUR/USD support without deleting data)
     3) database_migration_images.sql        (adds Category image support without deleting data)
 
 Legacy orders did not originally store an exchange-rate snapshot. The currency
-migration backfills those old orders with the migration-time EUR rate. Every new
+migration backfills those old orders with the migration-time USD rate. Every new
 order after the upgrade stores its exact checkout-time rate.
 
 4. DATABASE CONNECTION
@@ -51,7 +51,6 @@ Admin:
     - Product/category/order management
     - Can view financial data and current exchange rate
     - Cannot create/control User/Admin accounts
-    - Cannot change currency settings
     - Can change own password
 
 Super Admin:
@@ -59,7 +58,7 @@ Super Admin:
     - Full account control
     - Can create/deactivate Normal Admin accounts
     - Can activate/deactivate customer accounts
-    - Can update EUR exchange rate
+    - Can view automatic EUR/USD rate source/details
     - Can change own password
 
 6. FIRST REGISTRATION
@@ -78,41 +77,41 @@ All roles use the same login page:
 7. DUAL CURRENCY SYSTEM
 -----------------------
 Base/accounting currency:
-    BDT (Bangladeshi Taka)
-
-Reference currency:
     EUR (Euro)
 
-Typical display:
-    ৳ 15,500.00
-    ≈ € 108.12
+Reference currency:
+    USD (US Dollar)
 
-Product, cart and checkout reference conversions use the CURRENT configured EUR
-rate. New orders save a snapshot of that rate so historical order EUR totals do
-not change when the Super Admin later updates the rate.
+Typical display:
+    € 100.00
+    ≈ $ 115.92
+
+Product, cart and checkout reference conversions use the CURRENT automatically
+synchronized USD rate. New orders save a snapshot of that rate so historical
+order USD totals do not change when the market/reference rate later changes.
 
 Order fields used for currency history:
-    total_amount          -> BDT amount
-    base_currency         -> BDT
-    eur_exchange_rate     -> rate saved at checkout
-    total_eur             -> EUR reference total saved at checkout
+    total_amount          -> EUR amount
+    base_currency         -> EUR
+    usd_exchange_rate     -> USD per EUR rate saved at checkout
+    total_usd             -> USD reference total saved at checkout
 
-8. CURRENCY SETTINGS
---------------------
-Super Admin only:
+8. AUTOMATIC EUR/USD RATE
+------------------------
+Shopora automatically retrieves the latest published EUR/USD rate.
+No Admin or Super Admin needs to enter a numeric exchange rate manually.
+
+The browser checks the local Shopora endpoint every 60 seconds. Shopora uses a
+shared database cache and refreshes the external source only when due. If the
+external source is unavailable, the last successful rate remains active.
+
+Super Admin can view diagnostic details at:
     Admin Dashboard -> Currency Settings
 
-The Super Admin enters how many BDT equal 1 EUR.
-Example:
-    €1 = ৳143.50
+The page shows source, publication date, last checked time, and a diagnostic
+"Check source now" button.
 
-Normal Admins can see the current rate on the dashboard but cannot edit it.
-
-The supplied fresh/migration SQL starts with:
-    €1 = ৳143.361
-as the initial reference rate verified on 10 September 2026.
-
-9. WHERE BDT + EUR APPEAR
+9. WHERE EUR + USD APPEAR
 -------------------------
 Customer:
     - Home product cards
@@ -143,10 +142,10 @@ Cancelled orders are excluded from revenue/lifetime-spending totals.
 10. HISTORICAL RATE PROTECTION
 ------------------------------
 If an order was placed when:
-    €1 = ৳143.00
+    €1 = $1.1592
 and the Super Admin later changes the current rate to:
-    €1 = ৳150.00
-that old order continues to show the original saved EUR value based on ৳143.00.
+    €1 = $1.2000
+that old order continues to show the original saved USD value from the purchase-time rate.
 
 11. ADMIN PANEL
 ---------------
@@ -170,8 +169,8 @@ Super Admin-only features:
 
 12. PAYMENT NOTE
 ----------------
-Card and Mobile Banking are demo/database selections only. No real payment
-gateway is connected. BDT remains the final recorded payment currency; EUR is a
+Card and Mobile Banking are database selections only. No real payment
+gateway is connected. EUR remains the final recorded payment currency; USD is a
 reference value for display/reporting.
 
 13. SECURITY

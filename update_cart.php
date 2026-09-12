@@ -11,11 +11,13 @@ if (is_logged_in()) {
         $productId=(int)$productId; $qty=(int)$qty;
         if ($qty <= 0) $delete->execute([$cartId,$productId]); else $update->execute([$qty,$cartId,$productId]);
     }
+    log_user_activity($pdo, (int)$_SESSION['user']['user_id'], 'cart_update', 'Updated shopping cart quantities.', ['items_submitted'=>count($quantities)], (int)$_SESSION['user']['user_id']);
 } else {
     foreach ($quantities as $productId => $qty) {
         $productId=(int)$productId; $qty=(int)$qty;
         if ($qty <= 0) unset($_SESSION['guest_cart'][$productId]); else $_SESSION['guest_cart'][$productId]=$qty;
     }
 }
+if (!is_logged_in()) { realtime_notify('cart.updated', ['user_id'=>0, 'source'=>'guest']); }
 flash('success','Cart updated.');
 redirect('cart.php');

@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $id,
                 ]);
                 $message = 'Product updated successfully.';
+                log_user_activity($pdo,(int)$_SESSION['user']['user_id'],'product_updated','Updated product #' . $id . ': ' . $product['product_name'],['product_id'=>$id],(int)$_SESSION['user']['user_id']);
             } else {
                 $stmt = $pdo->prepare(
                     'INSERT INTO products (category_id, product_name, description, price, stock, image, status)
@@ -94,7 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $product['image'],
                     $product['status'],
                 ]);
+                $id=(int)$pdo->lastInsertId();
                 $message = 'Product added successfully.';
+                log_user_activity($pdo,(int)$_SESSION['user']['user_id'],'product_created','Created product #' . $id . ': ' . $product['product_name'],['product_id'=>$id],(int)$_SESSION['user']['user_id']);
             }
 
             if ($id && $originalImage && $originalImage !== $product['image']) {
@@ -161,7 +164,7 @@ require __DIR__ . '/includes/admin_header.php';
 
     <div class="form-grid" style="margin-top:16px">
         <div class="form-group">
-            <label>Price (BDT)</label>
+            <label>Price (EUR)</label>
             <input class="form-control" type="number" step="0.01" min="0" name="price" value="<?= e((string)$product['price']) ?>" required>
         </div>
         <div class="form-group">

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/functions.php';
+require_login();
 $pageTitle = 'Shop';
 $categoryId = max(0, (int)($_GET['category'] ?? 0));
 $q = trim($_GET['q'] ?? '');
@@ -39,6 +40,7 @@ require __DIR__ . '/includes/header.php';
         <div>
             <div class="shop-toolbar">
                 <form class="search-form" method="get" action="<?= url('shop.php') ?>">
+                    <?= session_context_field() ?>
                     <?php if ($categoryId): ?><input type="hidden" name="category" value="<?= $categoryId ?>"><?php endif; ?>
                     <input class="form-control" type="search" name="q" value="<?= e($q) ?>" placeholder="Search products...">
                     <button class="btn btn-primary">Search</button>

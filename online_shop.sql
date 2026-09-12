@@ -17,7 +17,13 @@ CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    phone VARCHAR(20) DEFAULT NULL,
+    phone VARCHAR(30) DEFAULT NULL,
+    profile_number VARCHAR(50) DEFAULT NULL,
+    profile_image VARCHAR(255) DEFAULT NULL,
+    address TEXT NULL,
+    blood_group VARCHAR(5) DEFAULT NULL,
+    joining_date DATE DEFAULT NULL,
+    gender VARCHAR(30) DEFAULT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('super_admin','admin','customer') NOT NULL DEFAULT 'customer',
     status ENUM('active','inactive') NOT NULL DEFAULT 'active',
@@ -29,12 +35,29 @@ CREATE TABLE currency_rates (
     currency_code CHAR(3) NOT NULL UNIQUE,
     currency_name VARCHAR(50) NOT NULL,
     currency_symbol VARCHAR(10) NOT NULL,
-    rate_to_bdt DECIMAL(12,6) NOT NULL,
+    rate_per_eur DECIMAL(12,6) NOT NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     updated_by INT NULL,
+    source_name VARCHAR(100) DEFAULT NULL,
+    source_url VARCHAR(255) DEFAULT NULL,
+    source_date DATE DEFAULT NULL,
+    last_checked_at DATETIME DEFAULT NULL,
+    auto_update TINYINT(1) NOT NULL DEFAULT 1,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_currency_updated_by FOREIGN KEY (updated_by)
         REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE user_mobile_numbers (
+    mobile_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    label VARCHAR(40) NOT NULL DEFAULT 'Mobile',
+    mobile_number VARCHAR(30) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_mobile_user (user_id),
+    CONSTRAINT fk_user_mobile_user FOREIGN KEY (user_id)
+        REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE categories (
@@ -85,9 +108,9 @@ CREATE TABLE orders (
     user_id INT NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(10,2) NOT NULL,
-    base_currency CHAR(3) NOT NULL DEFAULT 'BDT',
-    eur_exchange_rate DECIMAL(12,6) DEFAULT NULL,
-    total_eur DECIMAL(12,2) DEFAULT NULL,
+    base_currency CHAR(3) NOT NULL DEFAULT 'EUR',
+    usd_exchange_rate DECIMAL(12,6) DEFAULT NULL,
+    total_usd DECIMAL(12,2) DEFAULT NULL,
     shipping_address TEXT NOT NULL,
     payment_method ENUM('Cash on Delivery','Card','Mobile Banking') NOT NULL DEFAULT 'Cash on Delivery',
     order_status ENUM('Pending','Processing','Shipped','Delivered','Cancelled') NOT NULL DEFAULT 'Pending',
@@ -136,10 +159,69 @@ CREATE TABLE reviews (
 ) ENGINE=InnoDB;
 
 
--- Initial EUR reference rate verified on 2026-09-10.
--- Super Admin can update it later from Admin -> Currency Settings.
-INSERT INTO currency_rates (currency_code, currency_name, currency_symbol, rate_to_bdt, is_active, updated_by)
-VALUES ('EUR', 'Euro', '€', 143.361000, 1, NULL)
+
+-- Support Center: threaded contact conversations and replies
+CREATE TABLE IF NOT EXISTS contact_conversations (
+    conversation_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    requester_name VARCHAR(100) NOT NULL,
+    requester_email VARCHAR(150) NOT NULL,
+    subject VARCHAR(180) NOT NULL,
+    status ENUM('Open','Answered','Closed') NOT NULL DEFAULT 'Open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_message_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_contact_conversation_user FOREIGN KEY (user_id)
+        REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_contact_user (user_id),
+    INDEX idx_contact_email (requester_email),
+    INDEX idx_contact_status_last (status, last_message_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+    message_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    sender_user_id INT NULL,
+    sender_role ENUM('guest','customer','admin','super_admin') NOT NULL DEFAULT 'guest',
+    message_type ENUM('requester','staff') NOT NULL DEFAULT 'requester',
+    sender_name VARCHAR(100) NOT NULL,
+    sender_email VARCHAR(150) NOT NULL,
+    message_text TEXT NOT NULL,
+    seen_by_requester TINYINT(1) NOT NULL DEFAULT 0,
+    seen_by_staff TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_contact_message_conversation FOREIGN KEY (conversation_id)
+        REFERENCES contact_conversations(conversation_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_contact_message_user FOREIGN KEY (sender_user_id)
+        REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_contact_message_thread (conversation_id, created_at),
+    INDEX idx_contact_message_staff_unread (message_type, seen_by_staff),
+    INDEX idx_contact_message_requester_unread (message_type, seen_by_requester)
+) ENGINE=InnoDB;
+
+-- Meaningful account/activity audit trail used by Admin/Super Admin history lookup
+CREATE TABLE IF NOT EXISTS user_activity_logs (
+    activity_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    actor_user_id INT NULL,
+    activity_type VARCHAR(64) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    metadata_json JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_activity_user FOREIGN KEY (user_id)
+        REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_activity_actor FOREIGN KEY (actor_user_id)
+        REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_activity_user_time (user_id, created_at),
+    INDEX idx_activity_actor_time (actor_user_id, created_at),
+    INDEX idx_activity_type_time (activity_type, created_at)
+) ENGINE=InnoDB;
+
+-- Initial USD reference rate from the ECB reference rate published for 2026-09-11.
+-- EUR is the base currency; 1 EUR = 1.1592 USD.
+-- This fallback value is replaced automatically when Shopora reaches the live EUR/USD source.
+INSERT INTO currency_rates (currency_code, currency_name, currency_symbol, rate_per_eur, is_active, updated_by)
+VALUES ('USD', 'US Dollar', '$', 1.159200, 1, NULL)
 ON DUPLICATE KEY UPDATE currency_code = VALUES(currency_code);
 
 INSERT INTO categories (category_id, category_name, description) VALUES
@@ -150,9 +232,9 @@ INSERT INTO categories (category_id, category_name, description) VALUES
 (5, 'Home & Living', 'Home and living products');
 
 INSERT INTO products (product_id, category_id, product_name, description, price, stock, image, status) VALUES
-(1, 1, 'Wireless Headphone', 'Bluetooth wireless headphone', 2500.00, 20, NULL, 'available'),
-(2, 1, 'Smart Watch', 'Digital smart watch', 3500.00, 15, NULL, 'available'),
-(3, 3, 'Samsung Smartphone', 'Android smartphone', 35000.00, 10, NULL, 'available'),
-(4, 4, 'Laptop', 'Laptop for office and study', 65000.00, 8, NULL, 'available'),
-(5, 2, 'T-Shirt', 'Cotton casual t-shirt', 750.00, 40, NULL, 'available'),
-(6, 5, 'Table Lamp', 'Modern LED table lamp', 1200.00, 25, NULL, 'available');
+(1, 1, 'Wireless Headphone', 'Bluetooth wireless headphone', 17.44, 20, NULL, 'available'),
+(2, 1, 'Smart Watch', 'Digital smart watch', 24.41, 15, NULL, 'available'),
+(3, 3, 'Samsung Smartphone', 'Android smartphone', 244.14, 10, NULL, 'available'),
+(4, 4, 'Laptop', 'Laptop for office and study', 453.40, 8, NULL, 'available'),
+(5, 2, 'T-Shirt', 'Cotton casual t-shirt', 5.23, 40, NULL, 'available'),
+(6, 5, 'Table Lamp', 'Modern LED table lamp', 8.37, 25, NULL, 'available');

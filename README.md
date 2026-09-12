@@ -4,7 +4,7 @@ Shopora is a complete web-based **Online Shopping Management System** developed 
 
 The system provides a customer-facing e-commerce website together with a role-based administration panel for **Customers, Admins, and Super Admins**.
 
-It includes product and category management, shopping cart, checkout, order management, product reviews, image uploads, customer management, administrator management, and a dual-currency **BDT + EUR** display system.
+It includes product and category management, shopping cart, checkout, order management, product reviews, image uploads, customer management, administrator management, and a dual-currency **EUR + USD** display system.
 
 ---
 
@@ -28,7 +28,7 @@ Customers can:
 - View order history
 - View individual order details
 - Submit product reviews after eligible purchases
-- View total spending in both **BDT and EUR**
+- View total spending in both **EUR and USD**
 
 ### 🛠️ Admin
 
@@ -44,7 +44,7 @@ Normal Admins can:
 - Manage orders
 - Update order status
 - Update payment status
-- View the current EUR exchange rate
+- View the current USD exchange rate
 - Change their own password
 
 Normal Admins **cannot**:
@@ -52,7 +52,6 @@ Normal Admins **cannot**:
 - Create another Admin
 - Manage Admin accounts
 - Manage Customer accounts
-- Change the EUR exchange rate
 - Access Super Admin-only account management pages
 
 ### 👑 Super Admin
@@ -67,8 +66,8 @@ A Super Admin can:
 - Manage Customer accounts
 - Activate or deactivate Customers
 - View customer lifetime spending
-- Control the EUR exchange rate
-- Access Currency Settings
+- View automatic EUR/USD rate details
+- Access Currency Rate details
 - Change their own password
 
 ---
@@ -133,20 +132,20 @@ All users use the same login page.
 Shopora uses:
 
 ```text
-Base Currency      : BDT — Bangladeshi Taka
-Reference Currency : EUR — Euro
+Base Currency      : EUR — Euro
+Reference Currency : USD — US Dollar
 ```
 
 Typical product price display:
 
 ```text
-৳ 15,500.00
-≈ € 108.12
+€ 100.00
+≈ $ 115.92
 ```
 
-BDT remains the main accounting and payment currency.
+EUR remains the main accounting and payment currency.
 
-EUR is displayed as a reference currency throughout the website.
+USD is displayed as a reference currency throughout the website.
 
 Dual currency information is available in:
 
@@ -182,32 +181,13 @@ Additionally includes:
 
 ---
 
-## 💱 Exchange Rate Management
+## 💱 Automatic EUR/USD Reference Rate
 
-Only the **Super Admin** can modify the EUR exchange rate.
+Shopora automatically retrieves the latest published EUR/USD reference rate from the configured online provider. No administrator needs to type the rate manually.
 
-Navigate to:
+The browser checks Shopora every minute. Shopora uses a shared MySQL cache so only one upstream refresh is needed for all active accounts. If the internet/source is temporarily unavailable, the last successful rate remains active.
 
-```text
-Admin Dashboard
-→ Currency Settings
-```
-
-The rate is entered as:
-
-```text
-1 EUR = X BDT
-```
-
-For example:
-
-```text
-1 EUR = ৳143.50
-```
-
-Normal Admins can see the current exchange rate but cannot modify it.
-
----
+The Super Admin Currency Rate page is now read-only for the value and shows the source, publication date and last check time. A **Check source now** button is available only as a diagnostic/fallback action.
 
 ## 🧾 Historical Exchange Rate Protection
 
@@ -217,24 +197,24 @@ For example:
 
 ```text
 Order Date Rate:
-1 EUR = ৳143.00
+1 EUR = $1.1592
 
 Order Total:
-৳14,300
-€100
+€100.00
+$115.92
 ```
 
 If the Super Admin later changes the current rate to:
 
 ```text
-1 EUR = ৳150.00
+1 EUR = $1.2000
 ```
 
 the old order will still display:
 
 ```text
-৳14,300
-€100
+€100.00
+$115.92
 ```
 
 This prevents historical financial information from changing when exchange rates are updated.
@@ -360,9 +340,9 @@ Card
 Mobile Banking
 ```
 
-> **Note:** Card and Mobile Banking are currently demonstration/database payment options. No real external payment gateway is connected.
+> **Note:** Card and Mobile Banking are currently database payment options. No real external payment gateway is connected.
 
-BDT is the main recorded payment currency. EUR is used for reference and reporting.
+EUR is the main recorded payment currency. USD is used for reference and reporting.
 
 ---
 
@@ -406,7 +386,7 @@ categories
  └── products
 
 currency_rates
- └── managed by Super Admin
+ └── automatically synchronized EUR/USD reference rate
 ```
 
 ---
@@ -766,7 +746,7 @@ database_migration_currency.sql
 
 Adds:
 
-- EUR currency support
+- USD currency support
 - Currency rate storage
 - Historical order exchange-rate information
 
@@ -837,7 +817,7 @@ After installation, verify the following:
 ✓ Checkout creates an order
 ✓ Stock is updated after checkout
 ✓ Order history works
-✓ BDT and EUR amounts appear correctly
+✓ EUR and USD amounts appear correctly
 ✓ Admin can manage products
 ✓ Admin can manage categories
 ✓ Product image upload works
@@ -845,7 +825,7 @@ After installation, verify the following:
 ✓ Normal Admin cannot manage accounts
 ✓ Super Admin can manage Customers
 ✓ Super Admin can create Admins
-✓ Super Admin can update EUR rate
+✓ Super Admin can update USD rate
 ✓ Admin can change own password
 ```
 
@@ -956,8 +936,8 @@ Import
 - Do not use the fresh SQL file if your database already contains important data.
 - Keep database backups before running migration files.
 - Do not commit production passwords or API credentials to a public GitHub repository.
-- The current payment methods are demonstration implementations and are not connected to a real payment gateway.
-- EUR values are reference values; BDT remains the application's primary accounting currency.
+- The current payment methods are database-recorded options and are not connected to a real payment gateway.
+- USD values are reference values; EUR remains the application's primary accounting currency.
 - The project is currently configured for the `/online_shop` local path.
 
 ---
@@ -998,7 +978,7 @@ C:\laragon\www\online_shop
 
 # 📚 Project Purpose
 
-Shopora was developed as a complete database-driven e-commerce web application demonstrating:
+Shopora was developed as a complete database-driven e-commerce web application covering:
 
 - Frontend development
 - Backend development
@@ -1017,4 +997,17 @@ Shopora was developed as a complete database-driven e-commerce web application d
 
 ## Shopora
 
-**A PHP & MySQL Online Shopping Management System with Customer, Admin, Super Admin, Product Management, Order Processing, Image Management, and BDT/EUR Currency Support.**
+**A PHP & MySQL Online Shopping Management System with Customer, Admin, Super Admin, Product Management, Order Processing, Image Management, and EUR/USD Currency Support.**
+## Support Center and User History
+
+This build includes a database-backed internal support system.
+
+- `contact.php` creates a real support conversation instead of showing a non-persistent success message.
+- Logged-in Customer, Admin, and Super Admin accounts can see their own conversations and staff replies from `support.php` / `support_view.php`.
+- Admin and Super Admin accounts can manage all conversations from `admin/support.php` and reply from `admin/support_view.php`.
+- Admin and Super Admin accounts can search an exact registered email from `admin/user_history.php` to review stored orders, payments, reviews, current cart, support conversations, and the meaningful activity audit log.
+- The audit log records meaningful actions after this update is installed (login/logout, cart changes, orders, reviews, support actions, account status changes, order/payment updates, and major administrator changes). Historical orders/reviews/cart records that existed before the audit migration remain available, but actions that were never stored by the old application cannot be reconstructed retroactively.
+
+### Existing database upgrade
+
+Import `database_migration_support_history.sql` into the existing `online_shop` database once. It only adds the support and audit tables; it does not delete existing store data.

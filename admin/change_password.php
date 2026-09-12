@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (int)$_SESSION['user']['user_id'],
             ]);
             session_regenerate_id(true);
+            $uid=(int)$_SESSION['user']['user_id'];
+            log_user_activity($pdo, $uid, 'password_changed', 'Changed administrator account password.', [], $uid);
             flash('success', 'Your password has been changed successfully.');
             redirect('admin/change_password.php');
         }

@@ -2,7 +2,7 @@
 <footer class="site-footer">
     <div class="container footer-grid">
         <div>
-            <a class="brand footer-brand" href="<?= url('index.php') ?>"><span class="brand-mark">S</span><span><?= e(APP_NAME) ?></span></a>
+            <a class="brand footer-brand" href="<?= url('index.php') ?>"><img class="brand-logo brand-logo-footer" src="<?= url('assets/images/shopora-logo.png') ?>" alt="<?= e(APP_NAME) ?> logo"><span><?= e(APP_NAME) ?></span></a>
             <p>A clean, modern online shopping experience powered by PHP and MySQL.</p>
         </div>
         <div>

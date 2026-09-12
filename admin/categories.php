@@ -11,15 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'delete') {
         $id = max(1, (int)($_POST['id'] ?? 0));
-        $stmt = $pdo->prepare('SELECT image FROM categories WHERE category_id = ?');
+        $stmt = $pdo->prepare('SELECT category_name,image FROM categories WHERE category_id = ?');
         $stmt->execute([$id]);
-        $oldImage = $stmt->fetchColumn() ?: null;
+        $oldCategory = $stmt->fetch();
+        $oldImage = $oldCategory['image'] ?? null;
 
         $stmt = $pdo->prepare('DELETE FROM categories WHERE category_id = ?');
         $stmt->execute([$id]);
         if ($oldImage) {
             delete_uploaded_image($oldImage);
         }
+        if ($oldCategory) { log_user_activity($pdo,(int)$_SESSION['user']['user_id'],'category_deleted','Deleted category #' . $id . ': ' . $oldCategory['category_name'],['category_id'=>$id],(int)$_SESSION['user']['user_id']); }
 
         flash('success', 'Category deleted. Products in it are now uncategorized.');
         redirect('admin/categories.php');
@@ -58,10 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare('UPDATE categories SET category_name = ?, description = ?, image = ? WHERE category_id = ?');
                 $stmt->execute([$name, $description, $finalImage, $id]);
                 $message = 'Category updated successfully.';
+                log_user_activity($pdo,(int)$_SESSION['user']['user_id'],'category_updated','Updated category #' . $id . ': ' . $name,['category_id'=>$id],(int)$_SESSION['user']['user_id']);
             } else {
                 $stmt = $pdo->prepare('INSERT INTO categories (category_name, description, image) VALUES (?, ?, ?)');
                 $stmt->execute([$name, $description, $finalImage]);
+                $id=(int)$pdo->lastInsertId();
                 $message = 'Category added successfully.';
+                log_user_activity($pdo,(int)$_SESSION['user']['user_id'],'category_created','Created category #' . $id . ': ' . $name,['category_id'=>$id],(int)$_SESSION['user']['user_id']);
             }
 
             if ($id && $originalImage && $originalImage !== $finalImage) {

@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $role = $selectedRole === 'admin' ? 'super_admin' : 'customer';
                 $stmt = $pdo->prepare(
-                    "INSERT INTO users (full_name, email, phone, password, role, status) VALUES (?, ?, ?, ?, ?, 'active')"
+                    "INSERT INTO users (full_name, email, phone, joining_date, password, role, status) VALUES (?, ?, ?, CURDATE(), ?, ?, 'active')"
                 );
                 $stmt->execute([
                     $name,
@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userId = (int)$pdo->lastInsertId();
 
                 if ($role === 'super_admin') {
+                    log_user_activity($pdo, $userId, 'account_created', 'Super Admin account created.', ['role' => $role], $userId);
                     flash('success', 'Super Admin account created successfully. Sign in with your credentials.');
                     redirect('login.php');
                 }
@@ -73,8 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'full_name' => $name,
                     'email' => $email,
                     'role' => 'customer',
+                    'profile_image' => null,
                 ];
                 merge_guest_cart($pdo, $userId);
+                log_user_activity($pdo, $userId, 'account_created', 'Customer account created.', ['role' => 'customer'], $userId);
                 flash('success', 'Your account has been created.');
                 redirect('account.php');
             }

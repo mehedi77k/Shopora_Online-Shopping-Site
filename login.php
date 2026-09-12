@@ -30,7 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'full_name' => $user['full_name'],
                 'email' => $user['email'],
                 'role' => $user['role'],
+                'profile_image' => $user['profile_image'] ?? null,
             ];
+
+            log_user_activity($pdo, (int)$user['user_id'], 'login', 'Signed in successfully.', ['role' => $user['role']], (int)$user['user_id']);
 
             if ($user['role'] === 'customer') {
                 merge_guest_cart($pdo, (int)$user['user_id']);
@@ -58,7 +61,7 @@ require __DIR__ . '/includes/header.php';
     <h1>Sign in</h1>
     <p class="muted">Users, Admins and the Super Admin sign in from this same page using their own credentials.</p>
     <?php if (!$hasAdmin): ?>
-        <div class="flash flash-info">No administrator has been created yet. The first Admin registration from the signup page becomes the Super Admin.</div>
+        <p class="form-note form-note-block">No administrator has been created yet. The first Admin registration becomes the Super Admin.</p>
     <?php endif; ?>
     <?php if ($errors): ?><div class="flash flash-error"><?= e(implode(' ', $errors)) ?></div><?php endif; ?>
     <div class="form-group"><label>Email address</label><input class="form-control" type="email" name="email" value="<?= e($email) ?>" required autocomplete="email"></div>
