@@ -1,250 +1,152 @@
-# 🛒 Shopora — Online Shopping Management System
+<div align="center">
 
-Shopora is a complete web-based **Online Shopping Management System** developed using **PHP, MySQL, HTML, CSS, and JavaScript**.
+# 🛒 Shopora
 
-The system provides a customer-facing e-commerce website together with a role-based administration panel for **Customers, Admins, and Super Admins**.
+### A complete online shopping platform for customers, store managers, and administrators
 
-It includes product and category management, shopping cart, checkout, order management, product reviews, image uploads, customer management, administrator management, and a dual-currency **EUR + USD** display system.
+![PHP](https://img.shields.io/badge/PHP-8%2B-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)
+![Responsive](https://img.shields.io/badge/Responsive-Desktop%20%7C%20Tablet%20%7C%20Mobile-2ea44f)
+![Status](https://img.shields.io/badge/Project-Active-16a34a)
+
+**Browse Products · Shopping Cart · Checkout · Orders · Reviews · Customer Accounts · Admin Panel · Store Management**
+
+[Live Website](https://shoporasite.xo.je/) · [GitHub Repository](https://github.com/mehedi77k/Shopora_Online-Shopping-Site)
+
+</div>
 
 ---
 
-## 📌 Project Overview
+## About Shopora
 
-Shopora provides three different user roles:
+**Shopora** is a complete online shopping website designed to make buying and managing products simple and organized.
 
-### 👤 Customer
+Customers can browse products, search by category, add items to a cart, place orders, check previous purchases, submit reviews, and manage their accounts. Store managers can manage products, categories, orders, images, and sales information from a separate administration area.
+
+The project also includes a **Super Admin** role for higher-level control over customer and administrator accounts.
+
+---
+
+## Main Features
+
+### 🛍️ Customer Shopping Experience
 
 Customers can:
 
-- Create an account
-- Login and logout
-- Browse products
-- Search and filter products
+- Create an account and sign in
+- Browse available products
+- Search for products
+- Filter products by category
 - View product details
-- Add products to cart
-- Update cart quantities
-- Remove products from cart
-- Checkout and place orders
+- Add products to the shopping cart
+- Change product quantities or remove items
+- Keep cart items before and after login
+- Place an order through checkout
 - View order history
 - View individual order details
 - Submit product reviews after eligible purchases
-- View total spending in both **EUR and USD**
+- Contact support
+- View spending information in EUR and USD
 
-### 🛠️ Admin
+---
 
-Normal Admins can:
+### 🛠️ Admin Panel
 
-- Access the Admin Dashboard
-- View sales statistics
-- Manage products
-- Add, edit, and delete products
+Store administrators can:
+
+- View a simple sales dashboard
+- Add new products
+- Edit existing products
+- Remove products
 - Upload and manage product images
-- Manage categories
-- Upload and manage category images
-- Manage orders
+- Create and manage product categories
+- Upload category images
+- View customer orders
 - Update order status
 - Update payment status
-- View the current USD exchange rate
+- View sales information
+- Check the current EUR/USD reference rate
 - Change their own password
 
-Normal Admins **cannot**:
-
-- Create another Admin
-- Manage Admin accounts
-- Manage Customer accounts
-- Access Super Admin-only account management pages
+---
 
 ### 👑 Super Admin
 
-The Super Admin has complete administrative control.
+The Super Admin has all normal Admin features, along with additional account-management options.
 
 A Super Admin can:
 
-- Perform all normal Admin operations
 - Create new Admin accounts
 - Activate or deactivate Admin accounts
-- Manage Customer accounts
-- Activate or deactivate Customers
-- View customer lifetime spending
-- View automatic EUR/USD rate details
-- Access Currency Rate details
-- Change their own password
+- Manage customer accounts
+- Activate or deactivate customers
+- View customer spending information
+- Access currency information
+- Manage the store at the highest level
+
+> Normal Admins cannot create other Admins or manage customer and administrator accounts.
 
 ---
 
-# ✨ Main Features
+## How Shopora Works
 
-## 🛍️ Shopping System
+```text
+Customer visits Shopora
+        ↓
+Browses or searches products
+        ↓
+Views product details
+        ↓
+Adds products to cart
+        ↓
+Reviews the shopping cart
+        ↓
+Completes checkout
+        ↓
+Order is created
+        ↓
+Customer can track the order from the account page
+        ↓
+Admin manages the order from the Admin Panel
+```
 
-- Product catalog
-- Product search
-- Category filtering
-- Product details
-- Shopping cart
-- Guest cart support
-- Logged-in customer cart
-- Cart merging after login
-- Checkout system
-- Order processing
-- Stock validation
-- Order history
-- Order details
+This keeps the shopping process easy for customers while giving store managers a clear way to handle daily store activities.
 
 ---
 
-## 🔐 Authentication & Role Management
+## User Roles
 
-Shopora contains a three-level authentication system:
-
-```text
-Customer
-Admin
-Super Admin
-```
-
-### First-Time Registration
-
-On a completely fresh installation, if no administrator exists, the registration page allows:
-
-```text
-Register as User
-Register as Admin
-```
-
-The **first Admin account registered becomes the Super Admin**.
-
-After the Super Admin has been created, public registration becomes:
-
-```text
-Register as User
-```
-
-only.
-
-Additional Admin accounts can then only be created by the **Super Admin** from the Admin Dashboard.
-
-All users use the same login page.
+| User Type | Main Purpose |
+|---|---|
+| **Customer** | Browse products, shop, place orders, review purchases, and manage personal account |
+| **Admin** | Manage products, categories, images, orders, and store activity |
+| **Super Admin** | Full store control, including Admin and customer account management |
 
 ---
 
-# 💰 Dual Currency System
+## Product & Category Management
 
-Shopora uses:
+Shopora allows store managers to organize the product catalog directly from the Admin Panel.
 
-```text
-Base Currency      : EUR — Euro
-Reference Currency : USD — US Dollar
-```
+### Product management includes:
 
-Typical product price display:
+- Add products
+- Edit product information
+- Delete products
+- Set product prices
+- Update stock
+- Add product images
+- Replace or remove images
+- Organize products by category
 
-```text
-€ 100.00
-≈ $ 115.92
-```
+### Category management includes:
 
-EUR remains the main accounting and payment currency.
+- Add categories
+- Edit categories
+- Add category images
+- Replace or remove category images
 
-USD is displayed as a reference currency throughout the website.
-
-Dual currency information is available in:
-
-### Customer Area
-
-- Homepage products
-- Shop page
-- Product details
-- Shopping cart
-- Checkout
-- Order confirmation
-- Order history
-- Order details
-- Lifetime spending
-
-### Admin Area
-
-- Product listing
-- Dashboard sales statistics
-- Total sales
-- Today's sales
-- Average order value
-- Recent orders
-- Order listing
-- Order details
-
-### Super Admin Area
-
-Additionally includes:
-
-- Customer lifetime spending
-- Currency Settings
-
----
-
-## 💱 Automatic EUR/USD Reference Rate
-
-Shopora automatically retrieves the latest published EUR/USD reference rate from the configured online provider. No administrator needs to type the rate manually.
-
-The browser checks Shopora every minute. Shopora uses a shared MySQL cache so only one upstream refresh is needed for all active accounts. If the internet/source is temporarily unavailable, the last successful rate remains active.
-
-The Super Admin Currency Rate page is now read-only for the value and shows the source, publication date and last check time. A **Check source now** button is available only as a diagnostic/fallback action.
-
-## 🧾 Historical Exchange Rate Protection
-
-When an order is placed, Shopora stores the exchange rate that was active at the time of checkout.
-
-For example:
-
-```text
-Order Date Rate:
-1 EUR = $1.1592
-
-Order Total:
-€100.00
-$115.92
-```
-
-If the Super Admin later changes the current rate to:
-
-```text
-1 EUR = $1.2000
-```
-
-the old order will still display:
-
-```text
-€100.00
-$115.92
-```
-
-This prevents historical financial information from changing when exchange rates are updated.
-
----
-
-# 🖼️ Product & Category Image Management
-
-Both Admins and Super Admins can upload images while managing the catalog.
-
-## Product Images
-
-Navigate to:
-
-```text
-Admin Dashboard
-→ Products
-→ Add Product / Edit Product
-```
-
-Supported features:
-
-- Upload image
-- Live image preview
-- Replace existing image
-- Remove existing image
-- Automatic fallback placeholder
-- Secure randomly generated filenames
-
-Supported formats:
+Supported image formats include:
 
 ```text
 JPG
@@ -253,268 +155,150 @@ PNG
 WEBP
 ```
 
-Maximum file size:
+The current upload limit is **4 MB per image**.
+
+---
+
+## Shopping Cart
+
+The shopping cart is designed to work for both visitors and registered customers.
+
+A visitor can add products before signing in. After login, Shopora can keep the cart and continue the shopping process without forcing the customer to start again.
+
+Customers can:
+
+- Add products
+- Increase or decrease quantities
+- Remove products
+- Review the total before checkout
+
+---
+
+## Orders
+
+After checkout, Shopora creates an order that can be viewed from both the customer account and the Admin Panel.
+
+Customers can see:
+
+- Order number
+- Ordered products
+- Total amount
+- Order status
+- Payment information
+- Previous orders
+
+Admins can review orders and update their progress.
+
+---
+
+## Payment Options
+
+The project currently includes the following payment choices:
+
+- **Cash on Delivery**
+- **Card**
+- **Mobile Banking**
+
+> **Important:** Card and Mobile Banking are currently shown as payment choices inside the system. A real online payment gateway is not connected yet.
+
+---
+
+## EUR & USD Price Display
+
+Shopora uses **EUR (Euro)** as its main store currency and also shows an approximate **USD (US Dollar)** value for easier reference.
+
+Example:
 
 ```text
-4 MB
+€100.00
+≈ $115.92
 ```
 
-Recommended product image size:
+The system can automatically update the EUR/USD reference rate from its configured online source.
+
+For previous orders, Shopora keeps the rate that was used when the order was placed. This helps old order totals remain consistent even when the current exchange rate changes later.
+
+---
+
+## Product Reviews
+
+Registered customers can submit reviews for products after an eligible purchase.
+
+This helps future customers understand the experience of previous buyers while keeping reviews connected to actual purchases.
+
+---
+
+## Customer Support
+
+Shopora includes customer support and contact options so users can communicate with the store when they need help with an order, product, or account-related issue.
+
+---
+
+## Account and Access Control
+
+Shopora separates customer, Admin, and Super Admin access so that each user sees only the options intended for their role.
+
+The project also includes basic protection for:
+
+- User passwords
+- Login sessions
+- Admin-only pages
+- Super Admin-only pages
+- Product image uploads
+- Customer and Admin account status
+- Checkout and stock updates
+
+---
+
+## Main Project Folders
 
 ```text
-800 × 800 px or larger
+Shopora_Online-Shopping-Site/
+│
+├── admin/              # Store management pages
+├── api/                # Small background requests used by the website
+├── assets/             # Design files, images, and browser scripts
+├── config/             # Main website and database settings
+├── includes/           # Shared page sections and common functions
+├── realtime/           # Live-update related files
+├── uploads/            # Uploaded product and category images
+│
+├── index.php           # Homepage
+├── shop.php            # Main shopping page
+├── product.php         # Product details
+├── cart.php            # Shopping cart
+├── checkout.php        # Checkout page
+├── account.php         # Customer account
+├── login.php           # Login page
+├── register.php        # Registration page
+├── support.php         # Customer support
+│
+└── online_shop.sql     # Fresh database setup file
 ```
 
 ---
 
-## Category Images
+# Running Shopora on Your Computer
 
-Navigate to:
-
-```text
-Admin Dashboard
-→ Categories
-→ Add / Edit Category
-```
-
-Category images support:
-
-- Upload
-- Preview
-- Replace
-- Remove
-- Automatic placeholder/fallback
-
-Uploaded category images are displayed on the homepage under:
-
-```text
-Shop by Category
-```
-
-Recommended category image size:
-
-```text
-1200 × 800 px
-```
-
-Uploaded images are stored inside:
-
-```text
-uploads/products/
-uploads/categories/
-```
+The easiest way to run the project locally is with **Laragon**.  
+You can also use **XAMPP** or **WAMP**.
 
 ---
 
-# 🛡️ Security Features
+## Option A — Run with Laragon
 
-Shopora includes several security measures:
+### 1. Install Laragon
 
-- PDO prepared statements
-- Password hashing using `password_hash()`
-- Password verification using `password_verify()`
-- CSRF protection
-- PHP session authentication
-- Session ID regeneration
-- Role-based authorization
-- Super Admin-only protected routes
-- Active account validation
-- Server-side image validation
-- MIME-type checking
-- Random upload filenames
-- Script execution protection inside upload directories
-- Database transactions during checkout
-- Stock locking and re-validation
-- Historical currency-rate snapshots
-- Public privileged registration disabled after first Super Admin creation
-
----
-
-# 💳 Payment Methods
-
-The current project includes:
-
-```text
-Cash on Delivery
-Card
-Mobile Banking
-```
-
-> **Note:** Card and Mobile Banking are currently database payment options. No real external payment gateway is connected.
-
-EUR is the main recorded payment currency. USD is used for reference and reporting.
-
----
-
-# 🗄️ Database
-
-Database name:
-
-```text
-online_shop
-```
-
-Main database tables:
-
-```text
-users
-categories
-products
-carts
-cart_items
-orders
-order_items
-payments
-reviews
-currency_rates
-```
-
-### Main Relationships
-
-```text
-users
- ├── carts
- │    └── cart_items ─── products
- │
- ├── orders
- │    ├── order_items ─── products
- │    └── payments
- │
- └── reviews ─────────── products
-
-categories
- └── products
-
-currency_rates
- └── automatically synchronized EUR/USD reference rate
-```
-
----
-
-# 🧰 Technologies Used
-
-| Technology | Purpose |
-|---|---|
-| PHP 8+ | Backend development |
-| MySQL 8+ | Database |
-| PDO | Secure database communication |
-| HTML5 | Page structure |
-| CSS3 | User interface styling |
-| JavaScript | Frontend interaction |
-| Apache | Web server |
-| PHP Sessions | Authentication |
-| phpMyAdmin | Database management |
-
----
-
-# 📁 Project Structure
-
-```text
-online_shop/
-│
-├── admin/
-│   ├── includes/
-│   ├── admins.php
-│   ├── categories.php
-│   ├── change_password.php
-│   ├── currency_settings.php
-│   ├── index.php
-│   ├── order_view.php
-│   ├── orders.php
-│   ├── product_delete.php
-│   ├── product_form.php
-│   ├── products.php
-│   └── users.php
-│
-├── assets/
-│   ├── css/
-│   ├── img/
-│   └── js/
-│
-├── config/
-│   └── config.php
-│
-├── includes/
-│   ├── footer.php
-│   ├── functions.php
-│   └── header.php
-│
-├── uploads/
-│   ├── categories/
-│   ├── products/
-│   └── .htaccess
-│
-├── about.php
-├── account.php
-├── add_to_cart.php
-├── cart.php
-├── checkout.php
-├── contact.php
-├── index.php
-├── login.php
-├── logout.php
-├── order_details.php
-├── order_success.php
-├── privacy.php
-├── product.php
-├── register.php
-├── remove_from_cart.php
-├── review_submit.php
-├── setup_admin.php
-├── shop.php
-├── update_cart.php
-│
-├── online_shop.sql
-├── database_schema.sql
-├── database_migration_super_admin.sql
-├── database_migration_currency.sql
-├── database_migration_images.sql
-│
-└── README.md
-```
-
----
-
-# ⚙️ Requirements
-
-Before running the project, install one of the following local PHP environments:
-
-- Laragon
-- XAMPP
-- WAMP
-
-Recommended environment:
-
-```text
-PHP 8+
-MySQL 8+
-Apache
-PDO MySQL extension
-PHP Fileinfo extension
-```
-
-This guide uses **Laragon**.
-
----
-
-# 🚀 How to Run the Project Using Laragon
-
-## Step 1 — Install Laragon
-
-Download and install Laragon.
-
-Start:
+Install Laragon and start:
 
 ```text
 Apache
 MySQL
 ```
 
-from the Laragon control panel.
-
 ---
 
-## Step 2 — Clone the Repository
+### 2. Download the Project
 
 Open PowerShell or Terminal inside:
 
@@ -522,21 +306,19 @@ Open PowerShell or Terminal inside:
 C:\laragon\www
 ```
 
-Then run:
+Run:
 
 ```bash
 git clone https://github.com/mehedi77k/Shopora_Online-Shopping-Site.git
 ```
 
-Rename the cloned folder to:
+Rename the downloaded folder to:
 
 ```text
 online_shop
 ```
 
-if necessary.
-
-The final project location should be:
+Your project should then be located at:
 
 ```text
 C:\laragon\www\online_shop
@@ -544,33 +326,27 @@ C:\laragon\www\online_shop
 
 ---
 
-## Step 3 — Create / Import the Database
+### 3. Create the Database
 
-Open phpMyAdmin:
+Open:
 
 ```text
 http://localhost/phpmyadmin/
 ```
 
-For a completely fresh installation, import:
+Then:
 
-```text
-online_shop.sql
-```
+1. Go to **Import**
+2. Select `online_shop.sql`
+3. Start the import
 
-The SQL file will create/configure the required:
+This prepares the database required by Shopora.
 
-```text
-online_shop
-```
-
-database and database tables.
-
-> Do not import the fresh SQL file over a database containing important existing data.
+> If you already have important Shopora data, do not replace it with the fresh SQL file without creating a backup first.
 
 ---
 
-## Step 4 — Check Database Configuration
+### 4. Check Database Settings
 
 Open:
 
@@ -578,7 +354,7 @@ Open:
 config/config.php
 ```
 
-The default Laragon/XAMPP-compatible configuration is:
+For a normal Laragon or XAMPP setup, the values are usually:
 
 ```php
 define('DB_HOST', 'localhost');
@@ -587,34 +363,39 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 ```
 
-If your MySQL username or password is different, update these values.
+If your MySQL account uses a password, update `DB_PASS`.
 
-For example:
-
-```php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'online_shop');
-define('DB_USER', 'root');
-define('DB_PASS', 'your_mysql_password');
-```
-
-The project base URL is configured as:
+The project is normally configured to use:
 
 ```php
 define('BASE_URL', '/online_shop');
 ```
 
-Therefore, the folder should normally be named:
+---
+
+### 5. Open Shopora
+
+After Apache and MySQL are running, visit:
 
 ```text
-online_shop
+http://localhost/online_shop/
 ```
+
+Shopora should now open in your browser.
 
 ---
 
-## Step 5 — Open the Website
+## Option B — Run with XAMPP
 
-After Apache and MySQL are running, open:
+Place the project inside:
+
+```text
+C:\xampp\htdocs\online_shop
+```
+
+Start **Apache** and **MySQL** from the XAMPP Control Panel.
+
+Import `online_shop.sql` through phpMyAdmin, then open:
 
 ```text
 http://localhost/online_shop/
@@ -622,155 +403,98 @@ http://localhost/online_shop/
 
 ---
 
-# 👑 First Super Admin Setup
+## First Admin Setup
 
-For a fresh database, open:
+For a fresh installation, open:
 
 ```text
 http://localhost/online_shop/register.php
 ```
 
-Because no administrator exists yet, you will see:
+If no administrator exists yet, the registration page allows the first Admin account to be created.
 
-```text
-Register as User
-Register as Admin
-```
+The **first Admin automatically becomes the Super Admin**.
 
-Choose:
+After that:
 
-```text
-Register as Admin
-```
+- Public users can register only as customers
+- Additional Admin accounts can be created only by the Super Admin
 
-and complete the registration.
-
-That first Admin account will automatically become the:
-
-```text
-SUPER ADMIN
-```
-
-After the Super Admin is created, public Admin registration is automatically disabled.
-
-From that point onward, normal visitors can only create Customer accounts.
+This prevents visitors from freely creating administrator accounts.
 
 ---
 
-# 🔑 Login
+## Login
 
-All roles use the same login page:
+All users use the same login page:
 
 ```text
 http://localhost/online_shop/login.php
 ```
 
-### Customer Login
+After login:
 
-A Customer is redirected to the customer area.
-
-### Admin Login
-
-An Admin is redirected to:
-
-```text
-http://localhost/online_shop/admin/
-```
-
-### Super Admin Login
-
-The Super Admin also enters through the same login page and receives access to the complete administration panel.
+- Customers continue to the customer area
+- Admins are taken to the Admin Panel
+- The Super Admin receives the full management options
 
 ---
 
-# 👨‍💼 Creating Additional Admins
+## Test Credentials
 
-A Normal Admin cannot create another Admin.
+Use these credentials for testing the application:
 
-Only the **Super Admin** can create additional Admin accounts.
-
-Login as Super Admin and navigate to:
-
-```text
-Admin Dashboard
-→ Administrators
-```
-
-Create the new Admin using the required information.
-
-The newly created Admin can then login through:
-
-```text
-http://localhost/online_shop/login.php
-```
-
-and change their own password from the Admin Dashboard.
+| Role | Email | Password |
+|---|---|---|
+| **SuperAdmin** | superadmin@gmail.com | superadmin123 |
+| **Admin** | admin@gmail.com | superadmin123 |
+| **User** | user@gmail.com | superadmin123 |
 
 ---
 
-# 🔄 Existing Database Upgrade
+## Basic Testing Checklist
 
-If you already have Shopora data such as:
+After setup, check that:
 
-- Customers
-- Products
-- Orders
-- Reviews
-- Admin accounts
-
-do **not** import the fresh `online_shop.sql` file.
-
-Instead, apply the migration files when required.
-
-Recommended migration order:
-
-```text
-1. database_migration_super_admin.sql
-2. database_migration_currency.sql
-3. database_migration_images.sql
-```
-
-### Super Admin Migration
-
-```text
-database_migration_super_admin.sql
-```
-
-Adds the Super Admin role and permission structure.
-
-### Currency Migration
-
-```text
-database_migration_currency.sql
-```
-
-Adds:
-
-- USD currency support
-- Currency rate storage
-- Historical order exchange-rate information
-
-### Image Migration
-
-```text
-database_migration_images.sql
-```
-
-Adds category image support without deleting existing catalog data.
-
-> Always back up your database before running migrations.
+- [ ] Homepage opens correctly
+- [ ] Shop page displays products
+- [ ] Product search works
+- [ ] Categories can be opened
+- [ ] Product images appear correctly
+- [ ] Customer registration works
+- [ ] Customer login works
+- [ ] Shopping cart works
+- [ ] Checkout creates an order
+- [ ] Order history appears in the customer account
+- [ ] Product reviews work for eligible purchases
+- [ ] Admin login works
+- [ ] Admin can manage products
+- [ ] Admin can manage categories
+- [ ] Admin can manage orders
+- [ ] Product and category image upload works
+- [ ] Super Admin can manage customers
+- [ ] Super Admin can create additional Admins
+- [ ] EUR and USD values appear correctly
 
 ---
 
-# 📦 Updating the Project from GitHub
+## Common Problems
 
-If the project is already cloned, open PowerShell inside:
+| Problem | What to Check |
+|---|---|
+| Website does not open | Make sure Apache is running and the project is inside the correct folder |
+| Database connection fails | Make sure MySQL is running and check `config/config.php` |
+| Products do not appear | Confirm that `online_shop.sql` was imported correctly |
+| Images do not appear | Check the `uploads/products` and `uploads/categories` folders |
+| Image upload fails | Use JPG, JPEG, PNG, or WEBP and keep the file within 4 MB |
+| Page shows 404 | Confirm the folder name is `online_shop` and the base path is `/online_shop` |
+| Admin page is unavailable | Make sure you are logged in with an Admin or Super Admin account |
 
-```text
-C:\laragon\www\online_shop
-```
+---
 
-Then run:
+## Updating Your Local Copy
+
+If the project is already downloaded from GitHub, open PowerShell or Terminal inside the project folder and run:
 
 ```bash
 git pull origin main
@@ -778,177 +502,81 @@ git pull origin main
 
 ---
 
-# 📤 Pushing Changes to GitHub
+## Main Tools Used
 
-After making changes:
+The project is built with commonly used web tools:
 
-```bash
-git add .
-git commit -m "Describe your changes"
-git push origin main
-```
-
-Example:
-
-```bash
-git add .
-git commit -m "Improve product image management"
-git push origin main
-```
+| Tool | Used For |
+|---|---|
+| **PHP** | Runs the main shopping and store-management features |
+| **MySQL** | Stores customers, products, orders, and other shop information |
+| **HTML** | Creates the website pages |
+| **CSS** | Controls the website design and responsive layout |
+| **JavaScript** | Adds interactive behavior |
+| **Apache** | Runs the website locally or on a web server |
+| **phpMyAdmin** | Makes database setup and management easier |
 
 ---
 
-# 🧪 Basic Testing Checklist
+## Project Purpose
 
-After installation, verify the following:
+Shopora was created as a complete online shopping project that demonstrates how a real store can manage both the **customer shopping experience** and the **store administration process** in one system.
+
+The project covers the full journey from:
 
 ```text
-✓ Homepage opens
-✓ Shop page loads products
-✓ Product images are displayed
-✓ Category images are displayed
-✓ Customer registration works
-✓ First Admin becomes Super Admin
-✓ Public Admin signup disappears afterwards
-✓ Customer login works
-✓ Admin login works
-✓ Super Admin login works
-✓ Cart works
-✓ Checkout creates an order
-✓ Stock is updated after checkout
-✓ Order history works
-✓ EUR and USD amounts appear correctly
-✓ Admin can manage products
-✓ Admin can manage categories
-✓ Product image upload works
-✓ Category image upload works
-✓ Normal Admin cannot manage accounts
-✓ Super Admin can manage Customers
-✓ Super Admin can create Admins
-✓ Super Admin can update USD rate
-✓ Admin can change own password
+Product Display
+      ↓
+Customer Shopping
+      ↓
+Shopping Cart
+      ↓
+Checkout
+      ↓
+Order Creation
+      ↓
+Order Management
+      ↓
+Customer History & Reviews
 ```
+
+It is suitable as an academic project, portfolio project, learning project, or starting point for a larger online store.
 
 ---
 
-# 🛠️ Common Problems
+## Future Improvements
 
-## Database Connection Failed
+Possible future additions include:
 
-If you see:
-
-```text
-Database connection failed
-```
-
-check:
-
-```text
-config/config.php
-```
-
-Make sure:
-
-```text
-MySQL is running
-Database name = online_shop
-Username = root
-Password = correct
-```
+- Real online payment gateway
+- Order delivery tracking
+- Email order notifications
+- Wishlist
+- Product discount and coupon system
+- More detailed sales reports
+- Improved customer support tools
+- Product recommendation features
+- Delivery charge calculation
+- Multi-language support
 
 ---
 
-## Website Shows 404
+## Important Notes
 
-Make sure the project is located at:
-
-```text
-C:\laragon\www\online_shop
-```
-
-and access it using:
-
-```text
-http://localhost/online_shop/
-```
-
-Also confirm:
-
-```php
-define('BASE_URL', '/online_shop');
-```
-
-inside `config/config.php`.
+- EUR is the main store currency; USD is shown as a reference.
+- Card and Mobile Banking are not connected to a real payment gateway yet.
+- Back up important store data before replacing or changing the database.
+- Do not publish real passwords or private account information in a public repository.
+- For security, login credentials are intentionally not included in this README.
 
 ---
 
-## Images Are Not Displaying
+## Repository
 
-Check that these directories exist:
-
-```text
-uploads/products/
-uploads/categories/
-```
-
-Also make sure Apache/PHP has permission to write files into those directories.
-
-If an uploaded image is missing, Shopora automatically displays a placeholder instead of a broken-image icon.
-
----
-
-## Image Upload Fails
-
-Verify:
-
-```text
-File type: JPG, JPEG, PNG, or WEBP
-Maximum size: 4 MB
-```
-
-Also ensure the PHP `fileinfo` extension is enabled.
-
----
-
-## phpMyAdmin Cannot Import SQL
-
-Make sure MySQL is running.
-
-Then open:
-
-```text
-http://localhost/phpmyadmin/
-```
-
-Select:
-
-```text
-Import
-→ Choose File
-→ online_shop.sql
-→ Import
-```
-
----
-
-# ⚠️ Important Notes
-
-- Do not use the fresh SQL file if your database already contains important data.
-- Keep database backups before running migration files.
-- Do not commit production passwords or API credentials to a public GitHub repository.
-- The current payment methods are database-recorded options and are not connected to a real payment gateway.
-- USD values are reference values; EUR remains the application's primary accounting currency.
-- The project is currently configured for the `/online_shop` local path.
-
----
-
-# 🌐 Repository
-
-GitHub Repository:
-
+**GitHub:**  
 https://github.com/mehedi77k/Shopora_Online-Shopping-Site
 
-Clone using:
+Clone the project with:
 
 ```bash
 git clone https://github.com/mehedi77k/Shopora_Online-Shopping-Site.git
@@ -956,49 +584,25 @@ git clone https://github.com/mehedi77k/Shopora_Online-Shopping-Site.git
 
 ---
 
-# 👨‍💻 Development Environment
+## Live Website
 
-The project can be developed using:
+Shopora can currently be viewed at:
 
-```text
-Visual Studio Code
-Laragon
-phpMyAdmin
-Git
-GitHub
-```
-
-Suggested local project path:
-
-```text
-C:\laragon\www\online_shop
-```
+**https://shoporasite.xo.je/**
 
 ---
 
-# 📚 Project Purpose
 
-Shopora was developed as a complete database-driven e-commerce web application covering:
+## Acknowledgement
 
-- Frontend development
-- Backend development
-- Relational database design
-- Authentication
-- Authorization
-- Role-based access control
-- Shopping cart management
-- Order processing
-- Inventory management
-- Image/file management
-- Multi-currency reporting
-- Secure PHP/MySQL programming
+Shopora was developed as a complete online shopping and store-management project covering customer shopping, order processing, product management, account management, and administration in a single website.
 
 ---
 
-#  Credentials
+<div align="center">
 
-superadmin@gmail.com,
-admin@gmail.com,
-user@gmail.com
+### 🛒 Shopora
 
-Password: superadmin123
+**Simple shopping for customers. Organized management for store administrators.**
+
+</div>
