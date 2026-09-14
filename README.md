@@ -995,19 +995,10 @@ Shopora was developed as a complete database-driven e-commerce web application c
 
 ---
 
-## Shopora
+#  Credentials
 
-**A PHP & MySQL Online Shopping Management System with Customer, Admin, Super Admin, Product Management, Order Processing, Image Management, and EUR/USD Currency Support.**
-## Support Center and User History
+superadmin@gmail.com
+admin@gmail.com
+user@gmail.com
 
-This build includes a database-backed internal support system.
-
-- `contact.php` creates a real support conversation instead of showing a non-persistent success message.
-- Logged-in Customer, Admin, and Super Admin accounts can see their own conversations and staff replies from `support.php` / `support_view.php`.
-- Admin and Super Admin accounts can manage all conversations from `admin/support.php` and reply from `admin/support_view.php`.
-- Admin and Super Admin accounts can search an exact registered email from `admin/user_history.php` to review stored orders, payments, reviews, current cart, support conversations, and the meaningful activity audit log.
-- The audit log records meaningful actions after this update is installed (login/logout, cart changes, orders, reviews, support actions, account status changes, order/payment updates, and major administrator changes). Historical orders/reviews/cart records that existed before the audit migration remain available, but actions that were never stored by the old application cannot be reconstructed retroactively.
-
-### Existing database upgrade
-
-Import `database_migration_support_history.sql` into the existing `online_shop` database once. It only adds the support and audit tables; it does not delete existing store data.
+Password: superadmin123
