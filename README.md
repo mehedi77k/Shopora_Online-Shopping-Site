@@ -432,6 +432,18 @@ After login:
 
 ---
 
+## Test Credentials
+
+Use these credentials for testing the application:
+
+| Role | Email | Password |
+|---|---|---|
+| **SuperAdmin** | superadmin@gmail.com | superadmin123 |
+| **Admin** | admin@gmail.com | superadmin123 |
+| **User** | user@gmail.com | superadmin123 |
+
+---
+
 ## Basic Testing Checklist
 
 After setup, confirm that:
