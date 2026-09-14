@@ -997,8 +997,8 @@ Shopora was developed as a complete database-driven e-commerce web application c
 
 #  Credentials
 
-superadmin@gmail.com
-admin@gmail.com
+superadmin@gmail.com,
+admin@gmail.com,
 user@gmail.com
 
 Password: superadmin123
