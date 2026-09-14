@@ -2,34 +2,23 @@
 
 # 🛒 Shopora
 
-### A Simple, Complete, and Responsive Online Shopping Platform
+### A complete online shopping platform for customers, store managers, and administrators
 
-Shopora is an online shopping system designed for **customers, store administrators, and super administrators**.  
-It provides a complete shopping experience—from browsing products and managing a cart to placing orders and managing the store.
+[![PHP](https://img.shields.io/badge/PHP-8%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](#)
+[![MySQL](https://img.shields.io/badge/MySQL-DATABASE-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](#)
+[![HTML5](https://img.shields.io/badge/HTML5-FRONTEND-E34F26?style=for-the-badge&logo=html5&logoColor=white)](#)
+[![CSS3](https://img.shields.io/badge/CSS3-RESPONSIVE-1572B6?style=for-the-badge&logo=css3&logoColor=white)](#)
+[![JavaScript](https://img.shields.io/badge/JAVASCRIPT-INTERACTIVE-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#)
 
-<p>
-  <img src="https://img.shields.io/badge/PHP-8%2B-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP">
-  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="MySQL">
-  <img src="https://img.shields.io/badge/HTML5-Frontend-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML5">
-  <img src="https://img.shields.io/badge/CSS3-Responsive-1572B6?style=flat-square&logo=css3&logoColor=white" alt="CSS3">
-  <img src="https://img.shields.io/badge/JavaScript-Interactive-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript">
-</p>
-
-<p>
-  <img src="https://img.shields.io/badge/Responsive-Desktop%20%7C%20Tablet%20%7C%20Mobile-2563EB?style=flat-square" alt="Responsive">
-  <img src="https://img.shields.io/badge/Status-Active-16A34A?style=flat-square" alt="Status">
-</p>
+[![Responsive](https://img.shields.io/badge/RESPONSIVE-DESKTOP%20%7C%20TABLET%20%7C%20MOBILE-2563EB?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/STATUS-ACTIVE-16A34A?style=for-the-badge)](#)
 
 **Browse Products · Shopping Cart · Checkout · Orders · Reviews · Customer Accounts · Admin Panel · Store Management**
 
 <br>
 
-<a href="https://shoporasite.xo.je/">
-  <img src="https://img.shields.io/badge/LIVE%20WEBSITE-VISIT%20NOW-0EA5E9?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Website">
-</a>
-<a href="https://github.com/mehedi77k/Shopora_Online-Shopping-Site">
-  <img src="https://img.shields.io/badge/GITHUB-REPOSITORY-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository">
-</a>
+[![Live Website](https://img.shields.io/badge/🌐_LIVE_WEBSITE-VISIT_NOW-0EA5E9?style=for-the-badge)](https://shoporasite.xo.je/)
+[![GitHub Repository](https://img.shields.io/badge/GITHUB-REPOSITORY-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/mehedi77k/Shopora_Online-Shopping-Site)
 
 </div>
 
